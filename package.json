@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPLv2",
   "dependencies": {
     "push-receiver": "^2.1.1",
     "ws": "^8.6.0"
