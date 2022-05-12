@@ -19,18 +19,28 @@ const getFCMCredentials = async () => {
         })
         return credentials;
     } else {
-        return JSON.parse(fs.readFileSync(FCM_PATH));
+        return JSON.parse(fs.readFileSync(FCM_PATH).toString('utf-8'));
     }
 }
 
 let persistentIds = []
 let listenerStarted = false;
+let notificationQueue = [];
 
 const handlePersistentIdReceive = async (receivedIds) => {
     persistentIds = receivedIds
     console.log("Received Persistent IDs!");
     if (!listenerStarted) {
         await startFCMListener()
+    } else if (notificationQueue.length > 0) {
+        console.log("Clearing queue");
+        notificationQueue.forEach(notification => {
+            wss.clients.forEach(client => {
+                client.send(JSON.stringify(notification));
+            })
+        })
+        notificationQueue = [];
+        console.log("Queue cleared");
     }
 }
 
@@ -43,9 +53,13 @@ const startFCMListener = async () => {
         console.log(notification, persistentId);
         persistentIds.push(persistentId)
         // Broadcast new FCM message
-        wss.clients.forEach(client => {
-            client.send(JSON.stringify({notification, persistentId}));
-        })
+        if (wss.clients.size > 0) {
+            wss.clients.forEach(client => {
+                client.send(JSON.stringify({notification, persistentId}));
+            })
+        } else {
+            notificationQueue.push({notification, persistentId});
+        }
     }
 }
 
