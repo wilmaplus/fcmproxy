@@ -5,7 +5,7 @@ COPY . .
 RUN npm install
 
 VOLUME /usr/src/app/data
-ENV FCM_PATH=/usr/src/app/data/fcmcred.json
+ENV FCM_PATH=/usr/src/app/data/fcm_cred.json
 ENV SENDER_ID=${SENDER_ID}
 
 
